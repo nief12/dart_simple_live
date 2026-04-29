@@ -29,16 +29,16 @@ jobs:
           cd simple_live_app
           flutter pub get
 
-      # 👇👇👇 核心修复：伪造一个临时签名文件骗过 Gradle 检查 👇👇👇
+      # 👇👇👇 核心修复：把假签名直接放进 app/ 子目录里 👇👇👇
       - name: Create Fake Keystore for Bypassing
         run: |
           cd simple_live_app/android
-          keytool -genkey -v -keystore fake_keystore.jks -storepass 123456 -alias myalias -keypass 123456 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Fake, OU=Fake, O=Fake, L=Fake, ST=Fake, C=US"
+          # 注意看下一行，我们改成了 app/fake_keystore.jks
+          keytool -genkey -v -keystore app/fake_keystore.jks -storepass 123456 -alias myalias -keypass 123456 -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Fake, OU=Fake, O=Fake, L=Fake, ST=Fake, C=US"
           echo "storeFile=fake_keystore.jks" > key.properties
           echo "storePassword=123456" >> key.properties
           echo "keyPassword=123456" >> key.properties
           echo "keyAlias=myalias" >> key.properties
-      # 👆👆👆 =================================================== 👆👆👆
 
       - name: Build APK
         run: |
