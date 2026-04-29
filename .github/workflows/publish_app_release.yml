@@ -1,5 +1,5 @@
 name: app-build-action
-# 触发条件：支持手动点击运行
+
 on:
   workflow_dispatch:
   push:
@@ -7,41 +7,37 @@ on:
       - "v*"
 
 jobs:
-  build-android-only:
+  build-android:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      # 签出代码
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      # 设置JAVA环境
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
           cache: "gradle"
 
-      # 设置Flutter环境
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.38.x"
           cache: true
 
-      # 更新Flutter的packages
       - name: Restore packages
         run: |
           cd simple_live_app
           flutter pub get
 
-      # 打包APK (自动使用测试签名，无需密码)
       - name: Build APK
         run: |
           cd simple_live_app
           flutter build apk --release --split-per-abi
 
-      # 上传APK至Artifacts (你下载安装包的地方)
       - name: Upload APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -50,6 +46,3 @@ jobs:
             simple_live_app/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
             simple_live_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
             simple_live_app/build/app/outputs/flutter-apk/app-x86_64-release.apk
-
-      # 完成提示
-      - run: echo "🍏 Android APK Build is ${{ job.status }}."
